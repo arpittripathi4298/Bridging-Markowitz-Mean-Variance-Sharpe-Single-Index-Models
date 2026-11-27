@@ -7,7 +7,9 @@ This project implements **Markowitz Mean-Variance Portfolio Optimization** and *
 ## Workbook Structure
 | **`Raw Data`** | Daily closing prices and log returns for HUL, TCS, HDFC, AIRTEL, and GOLD (1,487 observations). |
 | **`Optimal Portfolio`** | Mean-variance optimization (Solver), annualized return/volatility, covariance matrix, Capital Allocation Line (CAL), and allocation chart. |
+
 | **`Single Index Model`** | Excess returns vs. NIFTY-500, asset alphas/betas, systematic vs. unsystematic risk decomposition, Security Market Line (SML), and SIM portfolio metrics. |
+
 | **`Regression Model`** | OLS regression outputs (ANOVA, $R^2$, $t$-stats, $p$-values, and residuals) for AIRTEL and GOLD against NIFTY-500. |
 
 ---
