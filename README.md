@@ -11,7 +11,7 @@ This project implements **Markowitz Mean-Variance Portfolio Optimization** and *
 
  **`Single Index Model`**  Excess returns vs. NIFTY-500, asset alphas/betas, systematic vs. unsystematic risk decomposition, Security Market Line (SML), and SIM portfolio metrics. 
 
- **`Regression Model`**  OLS regression outputs (ANOVA, $R^2$, $t$-stats, $p$-values, and residuals) for AIRTEL and GOLD against NIFTY-500. |
+ **`Regression Model`**  OLS regression outputs (ANOVA, $R^2$, $t$-stats, $p$-values, and residuals) for AIRTEL and GOLD against NIFTY-500. 
 
 ---
 
