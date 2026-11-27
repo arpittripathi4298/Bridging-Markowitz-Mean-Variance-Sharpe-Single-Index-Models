@@ -1,87 +1,91 @@
-Most portfolios do not fail because of poor asset selection; they fail because of hidden correlation risk. During macro drawdowns, assets assumed to be diversified often move in lockstep, eroding downside protection.
+# Portfolio Optimization & Single Index Model (SIM)
 
-This repository presents a two-stage institutional portfolio optimization study conducted across **1,487 trading days ($\approx 6$ years)** of Indian market data. By sequentially combining **Markowitz Mean-Variance Optimization (MVO)** with the **Sharpe Single Index Model (SIM)**, this project demonstrates how to screen out underperforming assets and re-engineer portfolio weights to maximize risk-adjusted efficiency.
-
-**Headline Result:** Transitioning from pure Markowitz optimization to a combined Markowitz + Single Index Model framework reduced portfolio volatility by **541 bps ($\approx 27\%$)**, capped systematic market exposure at a defensive **$\beta_P = 0.37$**, and boosted the **Sharpe Ratio from 1.03 to 1.25**.
+This project implements **Markowitz Mean-Variance Portfolio Optimization** and **Sharpe’s Single Index Model (SIM)** in Microsoft Excel using 6 years of daily historical price data (1,487 trading observations from November 2020 to November 2026) across five Indian market assets—**HUL, TCS, HDFC, AIRTEL, and GOLD**—benchmarked against the **NIFTY-500** index.
 
 ---
 
-## Dataset & Parameters
-
-* **Observation Window:** 1,487 trading days ($\approx 6$ years)
-* **Asset Universe:** Hindustan Unilever (HUL), Tata Consultancy Services (TCS), HDFC Bank, Bharti Airtel, and Gold
-* **Market Benchmark:** NIFTY-500
-* **Risk-Free Rate ($R_f$):** $5.93\%$
-
----
-
-## Methodology: A Two-Stage Framework
-
-### Stage 1: Markowitz Mean-Variance Optimization (The Asset Screener)
-Assets are evaluated based on historical returns, standalone volatility, and the full pairwise variance-covariance matrix to construct the Efficient Frontier. The objective is to maximize the portfolio Sharpe Ratio:
-
-$$\text{Maximize } S_P = \frac{E(R_P) - R_f}{\sigma_P}$$
-
-Subject to full investment and no short-selling constraints:
-
-$$\sum_{i=1}^{n} w_i = 1, \quad w_i \ge 0$$
-
-### Stage 2: Sharpe Single Index Model (The Risk Architect)
-Winning assets from Stage 1 are regressed against the NIFTY-500 benchmark to decompose total risk into **systematic (market) risk** and **unsystematic (asset-specific) risk**:
-
-$$R_i = \alpha_i + \beta_i R_m + e_i$$
-
-Where:
-* $R_i$ = Return of asset $i$
-* $R_m$ = Return of the market index (NIFTY-500)
-* $\alpha_i$ = Asset-specific excess return (intercept)
-* $\beta_i$ = Sensitivity of asset $i$ to market movements
-* $e_i$ = Residual (idiosyncratic) error term
+## Workbook Structure
+| **`Raw Data`** | Daily closing prices and log returns for HUL, TCS, HDFC, AIRTEL, and GOLD (1,487 observations). |
+| **`Optimal Portfolio`** | Mean-variance optimization (Solver), annualized return/volatility, covariance matrix, Capital Allocation Line (CAL), and allocation chart. |
+| **`Single Index Model`** | Excess returns vs. NIFTY-500, asset alphas/betas, systematic vs. unsystematic risk decomposition, Security Market Line (SML), and SIM portfolio metrics. |
+| **`Regression Model`** | OLS regression outputs (ANOVA, $R^2$, $t$-stats, $p$-values, and residuals) for AIRTEL and GOLD against NIFTY-500. |
 
 ---
 
-## Empirical Results
+## 1. Asset Summary & Optimal Portfolio (Markowitz)
 
-### 1. Standalone Asset Screening
-Prior to optimization, individual asset risk-return profiles revealed clear divergence across the universe:
+Using a **Risk-Free Rate ($R_f$) of 5.934%** (annual), Excel Solver maximizes the Sharpe Ratio under long-only constraints ($0 \le w_i \le 1, \sum w_i = 1$). The optimizer allocates capital exclusively to **AIRTEL** and **GOLD**, eliminating underperforming equities.
 
-| Asset | Annualized Return | Annualized Volatility ($\sigma$) | Markowitz Weight |
+| Security | Annual Return | Annual Std. Dev. | Optimum Weight |
 | :--- | :---: | :---: | :---: |
-| **HUL** | $-1.57\%$ | $20.47\%$ | $0.00\%$ |
-| **TCS** | $-1.74\%$ | $22.59\%$ | $0.00\%$ |
-| **HDFC Bank** | $+2.76\%$ | $21.91\%$ | $0.00\%$ |
-| **Bharti Airtel** | $+28.82\%$ | $22.67\%$ | $70.91\%$ |
-| **Gold** | $+20.26\%$ | $17.81\%$ | $29.09\%$ |
+| **HUL** | -1.57% | 20.47% | 0.00% |
+| **TCS** | -1.74% | 22.58% | 0.00% |
+| **HDFC** | 2.76% | 21.91% | 0.00% |
+| **AIRTEL** | 28.82% | 22.67% | **49.69%** |
+| **GOLD** | 20.26% | 17.81% | **50.31%** |
 
-*Markowitz optimization ruthlessly eliminated legacy underperformers (HUL, TCS, and HDFC Bank) and allocated $100\%$ of capital to Bharti Airtel and Gold.*
+### Optimal Portfolio Metrics
+* **Expected Annual Return:** `24.51%`
+* **Annualized Standard Deviation:** `14.42%`
+* **Risk-Free Rate:** `5.93%`
+* **Sharpe Ratio:** `1.29`
 
-### 2. Single Index Regression Diagnostics (vs. NIFTY-500)
-Regressing the two surviving assets against the NIFTY-500 exposed the mathematical driver behind their diversification synergy:
+### Capital Allocation Line (CAL)
 
-| Asset | Expected Return | Market Beta ($\beta$) | $R^2$ | $p$-value | Interpretation |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Bharti Airtel** | $27.91\%$ | $0.75$ | $22.80\%$ | $< 0.001$ | Statistically significant equity growth driver with sub-1.0 market beta. |
-| **Gold** | $20.03\%$ | $0.01$ | $0.01\%$ | $0.67$ | Mathematically uncorrelated to the NIFTY-500; true macro hedge. |
-
-### 3. Model Comparison: Markowitz vs. Single Index Model
-
-| Metric | Markowitz MVO | Sharpe Single Index Model | Impact / Delta |
-| :--- | :---: | :---: | :---: |
-| **Bharti Airtel Weight** | $70.91\%$ | $48.82\%$ | $-22.09\%$ |
-| **Gold Weight** | $29.09\%$ | $51.18\%$ | $+22.09\%$ |
-| **Expected Annual Return** | $26.33\%$ | $23.88\%$ | $-245\text{ bps}$ |
-| **Portfolio Volatility ($\sigma_P$)** | $19.78\%$ | $14.37\%$ | **$-541\text{ bps}$ ($\approx 27\%$ reduction)** |
-| **Portfolio Beta ($\beta_P$)** | — | $0.37$ | Defensive systematic exposure |
-| **Sharpe Ratio** | $1.03$ | **$1.25$** | **$+0.22$ ($\approx 21\%$ efficiency gain)** |
+| Risky Portfolio Weight | Expected Return | Standard Deviation |
+| :---: | :---: | :---: |
+| 0.0 | 5.93% | 0.00% |
+| 0.5 | 15.22% | 7.21% |
+| 1.0 | 24.51% | 14.42% |
+| 2.0 | 43.09% | 28.83% |
 
 ---
 
-## Key Insights & Strategic Interpretation
+## 2. Single Index Model (SIM) Output
 
-1. **Markowitz Chases Return; SIM Engineers Resilience:** Markowitz heavily weighted Bharti Airtel ($70.91\%$) to capture raw upside ($26.33\%$), accepting nearly $20\%$ volatility. The Single Index Model rebalanced to a near $50/50$ split—sacrificing just $2.45\%$ in expected return to cut portfolio volatility by more than a quarter.
-2. **The $\beta = 0.01$ Advantage:** With an $R^2$ of $0.01\%$ and $p = 0.67$, Gold is not merely a defensive asset—it is statistically decoupled from Indian equity market movements. Pairing it with a high-alpha, moderate-beta compounder like Airtel creates an asymmetric risk profile.
-3. **Alpha Above the Security Market Line (SML):** Both Bharti Airtel and Gold plotted well above the SML, generating substantial positive alpha while keeping systematic market exposure anchored at $\beta_P = 0.37$.
-4. **Institutional Takeaway:** Combining both models sequentially solves the classic pitfalls of each. Use **Markowitz** to strip away emotional bias and filter the investable universe, then apply the **Single Index Model** to size positions against macro risk budgets.
+The two-asset optimal portfolio (**AIRTEL** & **GOLD**) is evaluated against the **NIFTY-500** market index using excess returns:
 
+$$R_i - R_f = \alpha_i + \beta_i (R_M - R_f) + e_i$$
 
-*This project is for educational, quantitative research, and portfolio modeling purposes only. Historical performance and statistical parameters do not guarantee future results. Nothing in this repository constitutes financial or investment advice.*
+### Asset & Portfolio Parameters
+
+| Metric | AIRTEL | GOLD | SIM Portfolio |
+| :--- | :---: | :---: | :---: |
+| **Portfolio Weight ($W$)** | 48.82% | 51.18% | 100.00% |
+| **Daily Alpha ($\alpha$)** | 0.000623 | 0.000627 | — |
+| **Beta ($\beta$)** | 0.7456 | 0.0136 | **0.3710** |
+| **Expected Annual Return** | 27.91% | 20.03% | **23.88%** |
+| **Residual Variance ($\sigma_e^2$, Daily)** | 0.000158 | 0.000125 | — |
+
+### SIM Portfolio Summary
+* **Market Annualized Risk Premium (NIFTY-500):** `10.89%`
+* **Market Daily Variance ($\sigma_M^2$):** `0.000084` (Annual Variance: `2.12%`)
+* **Portfolio Daily Variance ($\sigma_P^2$):** `0.000082`
+* **Portfolio Annualized Std. Dev. ($\sigma_P$):** `14.37%`
+* **Portfolio Sharpe Ratio:** `1.25`
+
+---
+
+## 3. OLS Regression Summary (vs. NIFTY-500)
+
+| Regression Statistic | AIRTEL | GOLD |
+| :--- | :---: | :---: |
+| **Observations ($N$)** | 1,487 | 1,487 |
+| **Multiple $R$** | 0.4774 | 0.0111 |
+| **$R^2$** | 0.2279 | 0.0001 |
+| **Adjusted $R^2$** | 0.2274 | -0.0005 |
+| **Standard Error** | 0.0126 | 0.0112 |
+| **Beta (NIFTY-500 Coefficient)** | 0.7456 ($t = 20.94, p < 0.001$) | 0.0136 ($t = 0.43, p = 0.668$) |
+| **F-Statistic** | 438.35 ($p < 0.001$) | 0.18 ($p = 0.668$) |
+
+---
+
+## Key Insights
+* **Strong Diversification Benefit:** GOLD exhibits a near-zero beta ($\beta = 0.0136, R^2 = 0.0001$) relative to the NIFTY-500, acting as an effective hedge against equity market movements.
+* **Risk-Adjusted Performance:** Combining AIRTEL (high growth, $\beta = 0.75$) with GOLD (uncorrelated defensive asset) reduces portfolio volatility to **14.37%–14.42%**, lower than either asset individually, while delivering a **Sharpe Ratio of 1.25–1.29**.
+* **Model Consistency:** The Markowitz full-covariance model (`24.51%` return, `14.42%` risk) and the Single Index Model (`23.88%` return, `14.37%` risk) produce closely aligned risk-return profiles.
+
+---
+
+## Tools Used
+* **Microsoft Excel** (Solver, Analysis ToolPak for OLS Regression, Dynamic Formulas & Charts)
